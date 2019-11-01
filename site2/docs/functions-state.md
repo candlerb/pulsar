@@ -9,9 +9,11 @@ for storing the `State` for functions. For example, A `WordCount` function can s
 
 ## API
 
+<!--DOCUSAURUS_CODE_TABS-->
+<!--Java-->
 ### Java API
 
-Currently Pulsar Functions expose following APIs for mutating and accessing State. These APIs are avaible in the [Context](functions-api.md#context) object when
+Currently Pulsar Functions expose following APIs for mutating and accessing State. These APIs are available in the [Context](functions-api.md#context) object when
 you are using [Java SDK](functions-api.md#java-sdk-functions) functions.
 
 #### incrCounter
@@ -58,7 +60,7 @@ general key/value state.
 
 #### getState
 
-```
+```java
     /**
      * Retrieve the state value for the key.
      *
@@ -68,9 +70,72 @@ general key/value state.
     ByteBuffer getState(String key);
 ```
 
+#### deleteState
+
+```java
+    /**
+     * Delete the state value for the key.
+     *
+     * @param key   name of the key
+     */
+```
+
+Counters and binary values share the same keyspace, so this deletes either type of state.
+
+<!--Python-->
 ### Python API
 
-State currently is not supported at [Python SDK](functions-api.md#python-sdk-functions).
+Currently Pulsar Functions expose following APIs for mutating and accessing State. These APIs are available in the [Context](functions-api.md#context) object when
+you are using [Python SDK](functions-api.md#python-sdk-functions) functions.
+
+#### incr_counter
+
+```python
+  def incr_counter(self, key, amount):
+    """incr the counter of a given key in the managed state"""
+```
+
+Application can use `incr_counter` to change the counter of a given `key` by the given `amount`.
+If the `key` does not exist, it is created.
+
+#### get_counter
+
+```python
+  def get_counter(self, key):
+    """get the counter of a given key in the managed state"""
+```
+
+Application can use `get_counter` to retrieve the counter of a given `key` mutated by `incrCounter`.
+
+Besides the `counter` API, Pulsar also exposes a general key/value API for functions to store
+general key/value state.
+
+#### put_state
+
+```python
+  def put_state(self, key, value):
+    """update the value of a given key in the managed state"""
+```
+
+The key is a string, and the value is arbitrary binary data
+
+#### get_state
+
+```python
+  def get_state(self, key):
+    """get the value of a given key in the managed state"""
+```
+
+#### del_counter
+
+```python
+  def del_counter(self, key):
+    """delete the counter of a given key in the managed state"""
+```
+
+Counters and binary values share the same keyspace, so this deletes either type of state.
+
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 ## Query State
 
@@ -92,7 +157,8 @@ If `--watch` is specified, the CLI will watch the value of the provided `state-k
 
 ## Example
 
-### Java Example
+<!--DOCUSAURUS_CODE_TABS-->
+<!--Java-->
 
 {@inject: github:`WordCountFunction`:/pulsar-functions/java-examples/src/main/java/org/apache/pulsar/functions/api/examples/WordCountFunction.java} is a very good example
 demonstrating on how Application can easily store `state` in Pulsar Functions.
@@ -112,6 +178,20 @@ The logic of this `WordCount` function is pretty simple and straightforward:
 1. The function first splits the received `String` into multiple words using regex `\\.`.
 2. For each `word`, the function increments the corresponding `counter` by 1 (via `incrCounter(key, amount)`).
 
-### Python Example
+<!--Python-->
 
-State currently is not supported at [Python SDK](functions-api.md#python-sdk-functions).
+```python
+from pulsar import Function
+
+class WordCount(Function):
+    def process(self, item, context):
+        for word in item.split():
+            context.incr_counter(word, 1)
+```
+
+The logic of this `WordCount` function is pretty simple and straightforward:
+
+1. The function first splits the received string into multiple words on space
+2. For each `word`, the function increments the corresponding `counter` by 1 (via `incr_counter(key, amount)`).
+
+<!--END_DOCUSAURUS_CODE_TABS-->

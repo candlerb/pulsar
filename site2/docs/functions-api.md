@@ -265,6 +265,7 @@ public interface Context {
     void incrCounter(String key, long amount);
     long getCounter(String key);
     void putState(String key, ByteBuffer value);
+    void deleteState(String key);
     ByteBuffer getState(String key);
     Map<String, Object> getUserConfigMap();
     Optional<Object> getUserConfigValue(String key);

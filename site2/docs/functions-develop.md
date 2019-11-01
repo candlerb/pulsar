@@ -35,6 +35,20 @@ def process(input):
 ```
 For complete code, see [here](https://github.com/apache/pulsar/blob/master/pulsar-functions/python-examples/native_exclamation_function.py).
 
+Note that functions can be written in python2 or python3, but pulsar
+currently only looks for "python" as the interpreter to execute them.
+
+A recent Ubuntu system may have only "python3" but not "python", in which
+case functions will fail to start.  As a workaround you can create a symlink, but beware this has some
+[risks](https://askubuntu.com/questions/320996/how-to-make-python-program-command-execute-python-3#answer-475815):
+
+```bash
+sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 10
+```
+
+If you choose to do this, be careful not to install any other package which
+depends on "python" (2.x)
+
 <!--END_DOCUSAURUS_CODE_TABS-->
 
 The following example uses Pulsar Functions SDK.
@@ -702,3 +716,7 @@ To access metrics created by Pulsar Functions, refer to [Monitoring](deploy-moni
 Pulsar Functions use [Apache BookKeeper](https://bookkeeper.apache.org) as a state storage interface. Pulsar installation, including the local standalone installation, includes deployment of BookKeeper bookies.
 
 Since Pulsar 2.1.0 release, Pulsar integrates with Apache BookKeeper [table service](https://docs.google.com/document/d/155xAwWv5IdOitHh1NVMEwCMGgB28M3FyMiQSxEpjE-Y/edit#heading=h.56rbh52koe3f) to store the `State` for functions. For example, a `WordCount` function can store its `counters` state into BookKeeper table service via Pulsar Functions State API.
+
+States are key-value pairs, where the key is a string and the value is arbitrary binary data - counters are stored as 64-bit big-endian binary values.  Keys are scoped to an individual pulsar function, but shared between all instances of that function.
+
+States are accessed within pulsar functions using the `putState`, `getState`, `incrCounter`, `getCounter` and `deleteState` calls on the context object.  They can also be managed using the [querystate](pulsar-admin.md#querystate) and [putstate](pulsar-admin.md#putstate) options to `pulsar-admin functions`.
